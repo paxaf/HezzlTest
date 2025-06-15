@@ -26,16 +26,16 @@ type errorResponse struct {
 }
 
 type CreateRequest struct {
-	ProjectID   int    `json:"project_id" binding:"required"`
+	ProjectID   int    `json:"project_id" binding:"required,gt=0"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
 }
 
 type UpdateRequset struct {
-	Id          int    `json:"id" binding:"required"`
+	Id          int    `json:"id" binding:"required,gt=0"`
 	Name        string `json:"name" binding:"required"`
 	Description string `json:"description"`
-	Priority    int    `json:"priority" binding:"required"`
+	Priority    int    `json:"priority" binding:"required,gt=0"`
 	Removed     bool   `json:"removed" binding:"required"`
 }
 
