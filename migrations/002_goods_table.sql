@@ -13,9 +13,11 @@ CREATE TABLE IF NOT EXISTS GOODS (
 CREATE INDEX IF NOT EXISTS idx_goods_id ON GOODS(id);
 CREATE INDEX IF NOT EXISTS idx_goods_project_id ON GOODS(project_id);
 CREATE INDEX IF NOT EXISTS idx_goods_name ON GOODS(name);
+CREATE INDEX IF NOT EXISTS idx_goods_priority ON GOODS(priority);
 
 -- +goose Down
 DROP INDEX IF EXISTS idx_goods_id;
 DROP INDEX IF EXISTS idx_goods_project_id;
 DROP INDEX IF EXISTS idx_goods_name;
+DROP INDEX IF EXISTS idx_goods_priority;
 DROP TABLE IF EXISTS GOODS; 
