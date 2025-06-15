@@ -1,4 +1,4 @@
-package repository
+package clickHouse
 
 import (
 	"context"
@@ -11,7 +11,7 @@ import (
 )
 
 type ClickHouse struct {
-	conn driver.Conn
+	Conn driver.Conn
 }
 
 func NewClickHouse(cfg config.Clickhouse) (*ClickHouse, error) {
@@ -42,7 +42,7 @@ func NewClickHouse(cfg config.Clickhouse) (*ClickHouse, error) {
 	}
 
 	logger.Info("Connected to ClickHouse at", cfg.Address)
-	return &ClickHouse{conn: conn}, nil
+	return &ClickHouse{Conn: conn}, nil
 }
 
 func (ch *ClickHouse) Migrate(ctx context.Context) error {
@@ -50,5 +50,5 @@ func (ch *ClickHouse) Migrate(ctx context.Context) error {
 }
 
 func (ch *ClickHouse) Close() error {
-	return ch.conn.Close()
+	return ch.Conn.Close()
 }

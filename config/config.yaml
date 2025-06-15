@@ -25,3 +25,9 @@ redis:
 
 nats:
   url: "nats://nats:4222"
+
+clickhouse:
+  address: "clickhouse:9000"
+  database: "logs"
+  username: "admin"
+  password:

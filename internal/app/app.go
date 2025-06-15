@@ -17,10 +17,12 @@ import (
 	natsClient "github.com/paxaf/HezzlTest/internal/infrastructure/nats"
 	"github.com/paxaf/HezzlTest/internal/logger"
 	"github.com/paxaf/HezzlTest/internal/repository"
+	clickHouse "github.com/paxaf/HezzlTest/internal/repository/clickhouse"
 	"github.com/paxaf/HezzlTest/internal/repository/events"
 	"github.com/paxaf/HezzlTest/internal/repository/postgres"
 	redisClient "github.com/paxaf/HezzlTest/internal/repository/redis"
 	"github.com/paxaf/HezzlTest/internal/usecase"
+	"github.com/paxaf/HezzlTest/internal/worker"
 )
 
 type App struct {
@@ -29,6 +31,7 @@ type App struct {
 	closer    *closer
 	router    *gin.Engine
 	logger    *logger.Logger
+	work      *worker.ClickHouseWorker
 }
 
 func New(cfg *config.Config) (*App, error) {
@@ -81,8 +84,16 @@ func New(cfg *config.Config) (*App, error) {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	app.closer = NewCloser(pgpool, redisClient, event)
-
+	ch, err := clickHouse.NewClickHouse(app.config.Clickhouse)
+	if err != nil {
+		logger.Fatal("failed conn ch", err)
+	}
+	work, err := worker.NewClickHouseWorker(ns.Conn, ch.Conn, "db.events.>")
+	if err != nil {
+		logger.Fatal("failed init worker", err)
+	}
+	app.closer = NewCloser(pgpool, redisClient, event, work)
+	app.work = work
 	app.logger.Info("Application initialized successfully")
 	return app, nil
 }
@@ -97,6 +108,7 @@ func (app *App) Run() error {
 			app.logger.Fatal(err, "failed to start the server: %v")
 		}
 	}()
+	go app.work.Start(ctx)
 
 	<-ctx.Done()
 	app.logger.Info("Received shutdown signal")

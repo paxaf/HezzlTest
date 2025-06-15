@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS events (
+CREATE TABLE IF NOT EXISTS logs.events (
     timestamp    DateTime DEFAULT now(),
     action       Enum8('create' = 1, 'update' = 2, 'delete' = 3),
     entity       String,

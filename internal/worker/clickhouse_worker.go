@@ -168,3 +168,7 @@ func (w *ClickHouseWorker) insertBatch(ctx context.Context, events []entity.Even
 
 	return w.conn.Exec(ctx, query+valuePlaceholders, args...)
 }
+
+func (ch *ClickHouseWorker) Close() {
+	ch.conn.Close()
+}

@@ -9,19 +9,22 @@ import (
 	"github.com/paxaf/HezzlTest/internal/repository/events"
 	"github.com/paxaf/HezzlTest/internal/repository/postgres"
 	redisClient "github.com/paxaf/HezzlTest/internal/repository/redis"
+	"github.com/paxaf/HezzlTest/internal/worker"
 )
 
 type closer struct {
 	postgres *postgres.PgPool
 	redis    *redisClient.RedisClient
 	nats     *events.Event
+	worker   *worker.ClickHouseWorker
 }
 
-func NewCloser(postgres *postgres.PgPool, redis *redisClient.RedisClient, nats *events.Event) *closer {
+func NewCloser(postgres *postgres.PgPool, redis *redisClient.RedisClient, nats *events.Event, worker *worker.ClickHouseWorker) *closer {
 	return &closer{
 		postgres: postgres,
 		redis:    redis,
 		nats:     nats,
+		worker:   worker,
 	}
 }
 
@@ -38,6 +41,7 @@ func (c *closer) Close(app *App) error {
 	c.postgres.Close()
 	c.redis.Close()
 	c.nats.Close()
+	c.worker.Close()
 	logger.Info("Database connections closed successfully")
 
 	logger.Info("Application stopped gracefully")
