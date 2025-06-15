@@ -15,6 +15,7 @@ type Config struct {
 	APIServer APIServer      `mapstructure:"api_server"`
 	Postgres  PostgresConfig `mapstructure:"postgres"`
 	Redis     Redis          `mapstructure:"redis"`
+	Logger    Logger         `mapstructure:"logger"`
 }
 
 type AppConfig struct {
@@ -42,6 +43,10 @@ type Redis struct {
 	Password string
 	DB       int
 	TTL      time.Duration
+}
+
+type Logger struct {
+	Level string `mapstructure:"level"`
 }
 
 func LoadConfig() (*Config, error) {

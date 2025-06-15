@@ -22,3 +22,20 @@ type Redis interface {
 	RedisSetItem(key string, item interface{}) error
 	CleanCache() error
 }
+
+type Repository interface {
+	Postgres
+	Redis
+}
+
+type Repo struct {
+	Redis
+	Postgres
+}
+
+func New(redis Redis, pgpool Postgres) *Repo {
+	return &Repo{
+		Redis:    redis,
+		Postgres: pgpool,
+	}
+}

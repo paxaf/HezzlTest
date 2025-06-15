@@ -1,6 +1,9 @@
 package entity
 
-import "time"
+import (
+	"errors"
+	"time"
+)
 
 type Goods struct {
 	Id          int       `json:"id"`
@@ -15,3 +18,5 @@ type Goods struct {
 type GoodsResponse struct {
 	Goods []Goods `json:"goods"`
 }
+
+var ErrNotFound = errors.New("not found")

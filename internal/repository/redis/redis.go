@@ -21,6 +21,10 @@ func New(client *redis.Client) *RedisClient {
 	return &RedisClient{client: client}
 }
 
+func (rc *RedisClient) Close() {
+	rc.client.Close()
+}
+
 func (rc *RedisClient) RedisSetItem(key string, item interface{}) error {
 	data, err := json.Marshal(item)
 	if err != nil {

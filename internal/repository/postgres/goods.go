@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log"
 
@@ -189,7 +188,7 @@ func (r *PgPool) UpdateItem(ctx context.Context, item *entity.Goods) error {
 		return fmt.Errorf("failed update item: %w", err)
 	}
 	if res.RowsAffected() == 0 {
-		err = errors.New("no rows affected")
+		err = entity.ErrNotFound
 		return fmt.Errorf("failed update item: %w", err)
 	}
 	return nil
@@ -214,7 +213,7 @@ func (r *PgPool) DeleteItem(ctx context.Context, id int) error {
 		return fmt.Errorf("failed delete item: %w", err)
 	}
 	if res.RowsAffected() == 0 {
-		err = errors.New("no rows affected")
+		err = entity.ErrNotFound
 		return fmt.Errorf("failed delete item: %w", err)
 	}
 	return nil
