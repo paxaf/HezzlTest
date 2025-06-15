@@ -1,5 +1,5 @@
 -- +goose Up
-INSERT INTO PROJECTS (name) VALUES ('Первая запись');
+INSERT INTO projects (name) VALUES ('Первая запись');
 
 -- +goose Down
-TRUNCATE PROJECTS;
+TRUNCATE projects;

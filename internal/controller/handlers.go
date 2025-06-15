@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/paxaf/HezzlTest/internal/entity"
+	"github.com/paxaf/HezzlTest/internal/logger"
 	"github.com/paxaf/HezzlTest/internal/usecase"
 )
 
@@ -24,14 +25,31 @@ type errorResponse struct {
 	Error string `json:"error"`
 }
 
+type CreateRequest struct {
+	ProjectID   int    `json:"project_id" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description"`
+}
+
+type UpdateRequset struct {
+	Id          int    `json:"id" binding:"required"`
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description"`
+	Priority    int    `json:"priority" binding:"required"`
+	Removed     bool   `json:"removed" binding:"required"`
+}
+
 func (h *handler) GetAll(c *gin.Context) {
 	ctx := c.Request.Context()
 	key := c.Request.URL.String()
 	output, err := h.service.GetAllItems(ctx, key)
 	if err != nil {
-		// log
+		logger.Error("getall rrror", err)
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
 		return
+	}
+	if output == nil {
+		c.JSON(http.StatusOK, map[string]interface{}{})
 	}
 	c.JSON(http.StatusOK, output)
 }
@@ -47,7 +65,11 @@ func (h *handler) GetItem(c *gin.Context) {
 	}
 	output, err := h.service.GetItem(ctx, key, id)
 	if err != nil {
-		// log
+		if errors.Is(err, entity.ErrNotFound) {
+			c.JSON(http.StatusNotFound, errorResponse{Error: "Not found"})
+			return
+		}
+		logger.Error("getitem error", err)
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
 		return
 	}
@@ -60,9 +82,12 @@ func (h *handler) GetItemsByName(c *gin.Context) {
 	name := c.Param("name")
 	output, err := h.service.GetItemsByName(ctx, key, name)
 	if err != nil {
-		//log
+		logger.Error("getitemsbyname error", err)
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
 		return
+	}
+	if output == nil {
+		c.JSON(http.StatusOK, map[string]interface{}{})
 	}
 	c.JSON(http.StatusOK, output)
 }
@@ -78,28 +103,34 @@ func (h *handler) GetItemsByProject(c *gin.Context) {
 	}
 	output, err := h.service.GetItemsByProject(ctx, key, projectId)
 	if err != nil {
-		// log
+		logger.Error("getitemsbyproject error", err)
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
 		return
+	}
+	if output == nil {
+		c.JSON(http.StatusOK, map[string]interface{}{})
 	}
 	c.JSON(http.StatusOK, output)
 }
 
 func (h *handler) CreateItem(c *gin.Context) {
 	ctx := c.Request.Context()
-	var input entity.Goods
-	projectIdStr := c.Request.FormValue("project_id")
-	input.Name = c.Request.FormValue("name")
-	input.Description = c.Request.FormValue("description")
-	projectId, err := strconv.Atoi(projectIdStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse{Error: "Bad request"})
+	var req CreateRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		logger.Error("JSON binding error", err)
+		c.JSON(http.StatusBadRequest, errorResponse{
+			Error: "Invalid request format: " + err.Error(),
+		})
 		return
 	}
-	input.ProjectId = projectId
-	err = h.service.CreateItem(ctx, &input)
+	input := entity.Goods{
+		ProjectId:   req.ProjectID,
+		Description: req.Description,
+		Name:        req.Name,
+	}
+	err := h.service.CreateItem(ctx, &input)
 	if err != nil {
-		// log
+		logger.Error("createitem error", err)
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
 		return
 	}
@@ -108,30 +139,26 @@ func (h *handler) CreateItem(c *gin.Context) {
 
 func (h *handler) UpdateItem(c *gin.Context) {
 	ctx := c.Request.Context()
-	var input entity.Goods
-	input.Name = c.Request.FormValue("name")
-	input.Description = c.Request.FormValue("description")
-	priorityStr := c.Request.FormValue("priority")
-	removedStr := c.Request.FormValue("removed")
-	priority, err := strconv.Atoi(priorityStr)
-	if err != nil || priority < 1 {
+	var req UpdateRequset
+	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, errorResponse{Error: "Bad request"})
 		return
 	}
-	removed, err := strconv.ParseBool(removedStr)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, errorResponse{Error: "Bad request"})
-		return
+	input := entity.Goods{
+		Id:          req.Id,
+		Name:        req.Name,
+		Description: req.Description,
+		Removed:     req.Removed,
+		Priority:    req.Priority,
 	}
-	input.Priority = priority
-	input.Removed = removed
-	err = h.service.UpdateItem(ctx, &input)
+
+	err := h.service.UpdateItem(ctx, &input)
 	if err != nil {
 		if errors.Is(err, entity.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errorResponse{Error: "Not found"})
 			return
 		}
-		//log
+		logger.Error("update error", err)
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
 		return
 	}
@@ -152,7 +179,7 @@ func (h *handler) DeleteItem(c *gin.Context) {
 			c.JSON(http.StatusNotFound, errorResponse{Error: "Not found"})
 			return
 		}
-		//log
+		logger.Error("deleteitem error", err)
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
 		return
 	}

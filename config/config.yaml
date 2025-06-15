@@ -9,7 +9,7 @@ postgres:
   port: "5432"
   user: "default_user"
   password: "default_pass"
-  dbname: "postgres"
+  dbname: "default_dbname"
 
 api_server:
   host: "0.0.0.0"

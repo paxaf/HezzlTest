@@ -24,7 +24,7 @@ const (
 	queryLockGoods  = `LOCK TABLE goods IN ACCESS EXCLUSIVE MODE`
 	queryCreateItem = `INSERT INTO GOODS (project_id, name, description, priority) 
 	VALUES ($1, $2, $3, (SELECT COALESCE(MAX(priority), 0) + 1 FROM GOODS))`
-	queryUpdateItem = `UPDATE GOODS SET name = $1, description = $2, priority = $3, removed = $4`
+	queryUpdateItem = `UPDATE GOODS SET name = $1, description = $2, priority = $3, removed = $4 WHERE id = $5`
 	queryDeleteItem = `DELETE FROM GOODS WHERE id = $1`
 )
 
@@ -81,7 +81,7 @@ func (r *PgPool) GetItem(ctx context.Context, goodsId int) (*entity.Goods, error
 		&item.Created_at,
 	)
 	if err != nil {
-		return nil, fmt.Errorf("failed parse into sturct: %w", err)
+		return nil, entity.ErrNotFound
 	}
 	return &item, nil
 }
@@ -183,6 +183,7 @@ func (r *PgPool) UpdateItem(ctx context.Context, item *entity.Goods) error {
 		item.Description,
 		item.Priority,
 		item.Removed,
+		item.Id,
 	)
 	if err != nil {
 		return fmt.Errorf("failed update item: %w", err)

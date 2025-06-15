@@ -36,7 +36,7 @@ func (s *PostgresSuite) SetupSuite() {
 	ctx := context.Background()
 
 	req := testcontainers.ContainerRequest{
-		Image:        "redis:7-alpine",
+		Image:        "postgres:15",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"POSTGRES_USER":     "testuser",

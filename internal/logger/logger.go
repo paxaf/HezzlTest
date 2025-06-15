@@ -36,7 +36,10 @@ func New(level string) *Logger {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	zerolog.SetGlobalLevel(getLogLevel(level))
 
-	output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: "2006-01-02 15:04:05"}
+	output := zerolog.ConsoleWriter{
+		Out:        os.Stdout,
+		TimeFormat: "2006-01-02 15:04:05",
+	}
 	logger := zerolog.New(output).With().Timestamp().Caller().Logger()
 
 	l := &Logger{
@@ -47,58 +50,52 @@ func New(level string) *Logger {
 	return l
 }
 
-func Debug(message interface{}, args ...interface{}) {
-	if globalLogger == nil {
-		defaultLogLevel := "debug"
-		if os.Getenv("LOG_LEVEL") != "" {
-			defaultLogLevel = os.Getenv("LOG_LEVEL")
-		}
-		New(defaultLogLevel)
+func initLoggerIfNeeded(level LogLevel) {
+	if globalLogger != nil {
+		return
 	}
+
+	defaultLogLevel := "info"
+	switch level {
+	case DebugLog:
+		defaultLogLevel = "debug"
+	case WarnLog:
+		defaultLogLevel = "warn"
+	case ErrorLog:
+		defaultLogLevel = "error"
+	case FatalLog:
+		defaultLogLevel = "fatal"
+	}
+
+	if envLevel := os.Getenv("LOG_LEVEL"); envLevel != "" {
+		defaultLogLevel = envLevel
+	}
+
+	New(defaultLogLevel)
+}
+
+func Debug(message interface{}, args ...interface{}) {
+	initLoggerIfNeeded(DebugLog)
 	globalLogger.Debug(message, args...)
 }
 
 func Info(message string, args ...interface{}) {
-	if globalLogger == nil {
-		defaultLogLevel := "info"
-		if os.Getenv("LOG_LEVEL") != "" {
-			defaultLogLevel = os.Getenv("LOG_LEVEL")
-		}
-		New(defaultLogLevel)
-	}
+	initLoggerIfNeeded(InfoLog)
 	globalLogger.Info(message, args...)
 }
 
 func Warn(message string, args ...interface{}) {
-	if globalLogger == nil {
-		defaultLogLevel := "warn"
-		if os.Getenv("LOG_LEVEL") != "" {
-			defaultLogLevel = os.Getenv("LOG_LEVEL")
-		}
-		New(defaultLogLevel)
-	}
+	initLoggerIfNeeded(WarnLog)
 	globalLogger.Warn(message, args...)
 }
 
 func Error(message interface{}, args ...interface{}) {
-	if globalLogger == nil {
-		defaultLogLevel := "error"
-		if os.Getenv("LOG_LEVEL") != "" {
-			defaultLogLevel = os.Getenv("LOG_LEVEL")
-		}
-		New(defaultLogLevel)
-	}
+	initLoggerIfNeeded(ErrorLog)
 	globalLogger.Error(message, args...)
 }
 
 func Fatal(message interface{}, args ...interface{}) {
-	if globalLogger == nil {
-		defaultLogLevel := "info"
-		if os.Getenv("LOG_LEVEL") != "" {
-			defaultLogLevel = os.Getenv("LOG_LEVEL")
-		}
-		New(defaultLogLevel)
-	}
+	initLoggerIfNeeded(FatalLog)
 	globalLogger.Fatal(message, args...)
 }
 
@@ -123,58 +120,66 @@ func (l *Logger) Fatal(message interface{}, args ...interface{}) {
 }
 
 func (l *Logger) log(level LogLevel, message interface{}, args ...interface{}) {
-	var msg string
+	var msgStr string
 	switch v := message.(type) {
 	case error:
-		msg = v.Error()
+		msgStr = v.Error()
 	case string:
-		msg = v
+		msgStr = v
 	default:
-		msg = fmt.Sprintf("%v", v)
+		msgStr = fmt.Sprintf("%v", v)
 	}
 
-	if len(args) == 1 {
-		if fields, ok := args[0].(map[string]interface{}); ok {
-			l.msgWithFields(level, msg, fields)
+	event := l.createEvent(level)
+	if event == nil {
+		return
+	}
+
+	switch len(args) {
+	case 0:
+		event.Msg(msgStr)
+	case 1:
+		if err, ok := args[0].(error); ok {
+			event.Err(err).Msg(msgStr)
 			return
 		}
-	}
+		if fields, ok := args[0].(map[string]interface{}); ok {
+			event.Fields(fields).Msg(msgStr)
+			return
+		}
+		if strings.Contains(msgStr, "%") {
+			event.Msgf(msgStr, args[0])
+		} else {
+			event.Interface("arg", args[0]).Msg(msgStr)
+		}
+	default:
+		if strings.Contains(msgStr, "%") {
+			event.Msgf(msgStr, args...)
+		} else {
 
-	if len(args) > 0 && strings.Contains(msg, "%") {
-		msg = fmt.Sprintf(msg, args...)
-	}
-
-	l.msg(level, msg)
-}
-
-func (l *Logger) msgWithFields(level LogLevel, message string, fields map[string]interface{}) {
-	event := l.logger.With().Fields(fields).Logger()
-	switch level {
-	case DebugLog:
-		event.Debug().Msg(message)
-	case InfoLog:
-		event.Info().Msg(message)
-	case WarnLog:
-		event.Warn().Msg(message)
-	case ErrorLog:
-		event.Error().Msg(message)
-	case FatalLog:
-		event.Fatal().Msg(message)
+			fields := make(map[string]interface{})
+			for i, arg := range args {
+				fields[fmt.Sprintf("arg%d", i)] = arg
+			}
+			event.Fields(fields).Msg(msgStr)
+		}
 	}
 }
 
-func (l *Logger) msg(level LogLevel, message interface{}) {
+func (l *Logger) createEvent(level LogLevel) *zerolog.Event {
 	switch level {
 	case DebugLog:
-		l.logger.Debug().Msgf("%v", message)
+		return l.logger.Debug()
 	case InfoLog:
-		l.logger.Info().Msgf("%v", message)
+		return l.logger.Info()
 	case WarnLog:
-		l.logger.Warn().Msgf("%v", message)
+		return l.logger.Warn()
 	case ErrorLog:
-		l.logger.Error().Msgf("%v", message)
+		return l.logger.Error()
 	case FatalLog:
-		l.logger.Fatal().Msgf("%v", message)
+		return l.logger.Fatal()
+	default:
+		return l.logger.Info()
 	}
 }
 

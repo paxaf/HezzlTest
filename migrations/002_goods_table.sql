@@ -1,7 +1,7 @@
 -- +goose Up
-CREATE TABLE IF NOT EXISTS GOODS (
+CREATE TABLE IF NOT EXISTS goods(
 	id SERIAL,
-	project_id INT REFERENCES PROJECTS(id) ON DELETE CASCADE,
+	project_id INT REFERENCES projects(id) ON DELETE CASCADE,
 	name TEXT NOT NULL,
 	description TEXT,
 	priority INT NOT NULL,
@@ -10,14 +10,14 @@ CREATE TABLE IF NOT EXISTS GOODS (
 	PRIMARY KEY(id, project_id)
 );
 
-CREATE INDEX IF NOT EXISTS idx_goods_id ON GOODS(id);
-CREATE INDEX IF NOT EXISTS idx_goods_project_id ON GOODS(project_id);
-CREATE INDEX IF NOT EXISTS idx_goods_name ON GOODS(name);
-CREATE INDEX IF NOT EXISTS idx_goods_priority ON GOODS(priority);
+CREATE INDEX IF NOT EXISTS idx_goods_id ON goods(id);
+CREATE INDEX IF NOT EXISTS idx_goods_project_id ON goods(project_id);
+CREATE INDEX IF NOT EXISTS idx_goods_name ON goods(name);
+CREATE INDEX IF NOT EXISTS idx_goods_priority ON goods(priority);
 
 -- +goose Down
 DROP INDEX IF EXISTS idx_goods_id;
 DROP INDEX IF EXISTS idx_goods_project_id;
 DROP INDEX IF EXISTS idx_goods_name;
 DROP INDEX IF EXISTS idx_goods_priority;
-DROP TABLE IF EXISTS GOODS; 
+DROP TABLE IF EXISTS goods; 
