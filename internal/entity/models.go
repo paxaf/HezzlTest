@@ -6,9 +6,9 @@ import (
 )
 
 type Project struct {
-	Id         int       `json:"id"`
-	Name       string    `json:"name"`
-	Created_at time.Time `json:"created_at"`
+	Id        int       `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type Goods struct {
@@ -18,7 +18,7 @@ type Goods struct {
 	Description string    `json:"description"`
 	Priority    int       `json:"priority"`
 	Removed     bool      `json:"removed"`
-	Created_at  time.Time `json:"created_at"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type GoodsResponse struct {

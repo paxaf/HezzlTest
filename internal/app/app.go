@@ -17,6 +17,7 @@ import (
 	natsClient "github.com/paxaf/HezzlTest/internal/infrastructure/nats"
 	"github.com/paxaf/HezzlTest/internal/logger"
 	"github.com/paxaf/HezzlTest/internal/repository"
+	"github.com/paxaf/HezzlTest/internal/repository/events"
 	"github.com/paxaf/HezzlTest/internal/repository/postgres"
 	redisClient "github.com/paxaf/HezzlTest/internal/repository/redis"
 	"github.com/paxaf/HezzlTest/internal/usecase"
@@ -28,7 +29,6 @@ type App struct {
 	closer    *closer
 	router    *gin.Engine
 	logger    *logger.Logger
-	nats      *natsClient.NatsClient
 }
 
 func New(cfg *config.Config) (*App, error) {
@@ -49,12 +49,13 @@ func New(cfg *config.Config) (*App, error) {
 		DB:       cfg.Redis.DB,
 	})
 	redisClient := redisClient.New(rclient)
-	repo := repository.New(redisClient, pgpool)
+
 	ns, err := natsClient.New(app.config.Nats)
 	if err != nil {
 		logger.Fatal("failed create conn to nats", err)
 	}
-	app.nats = ns
+	event := events.New(ns)
+	repo := repository.New(redisClient, pgpool, event)
 	service := usecase.New(repo)
 	handler := controller.New(service)
 
@@ -80,7 +81,7 @@ func New(cfg *config.Config) (*App, error) {
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 
-	app.closer = NewCloser(pgpool, redisClient)
+	app.closer = NewCloser(pgpool, redisClient, event)
 
 	app.logger.Info("Application initialized successfully")
 	return app, nil

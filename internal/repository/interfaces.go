@@ -30,19 +30,26 @@ type Redis interface {
 	CleanCache() error
 }
 
+type Nats interface {
+	LogEvent(event entity.Event)
+}
+
 type Repository interface {
 	Postgres
 	Redis
+	Nats
 }
 
 type Repo struct {
 	Redis
 	Postgres
+	Nats
 }
 
-func New(redis Redis, pgpool Postgres) *Repo {
+func New(redis Redis, pgpool Postgres, nats Nats) *Repo {
 	return &Repo{
 		Redis:    redis,
 		Postgres: pgpool,
+		Nats:     nats,
 	}
 }

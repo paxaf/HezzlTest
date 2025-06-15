@@ -80,6 +80,7 @@ func (uc *usecase) CreateItem(ctx context.Context, item *entity.Goods) error {
 	if err != nil {
 		return err
 	}
+	uc.repo.LogEvent(entity.NewGoodEvent(entity.Create, *item))
 	return nil
 }
 
@@ -92,6 +93,7 @@ func (uc *usecase) UpdateItem(ctx context.Context, item *entity.Goods) error {
 	if err != nil {
 		return err
 	}
+	uc.repo.LogEvent(entity.NewGoodEvent(entity.Update, *item))
 	return nil
 }
 
@@ -104,5 +106,6 @@ func (uc *usecase) DeleteItem(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
+	uc.repo.LogEvent(entity.NewGoodEvent(entity.Delete, entity.Goods{Id: id}))
 	return nil
 }

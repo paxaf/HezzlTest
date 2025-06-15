@@ -44,7 +44,12 @@ func (uc *usecase) UpdateProject(ctx context.Context, item *entity.Project) erro
 	if err != nil {
 		return err
 	}
-	return uc.repo.UpdateProject(ctx, item)
+	err = uc.repo.UpdateProject(ctx, item)
+	if err != nil {
+		return err
+	}
+	uc.repo.LogEvent(entity.NewProjectEvent(entity.Update, *item))
+	return nil
 }
 
 func (uc *usecase) AddProject(ctx context.Context, item *entity.Project) error {
@@ -52,7 +57,12 @@ func (uc *usecase) AddProject(ctx context.Context, item *entity.Project) error {
 	if err != nil {
 		return err
 	}
-	return uc.repo.AddProject(ctx, item)
+	err = uc.repo.AddProject(ctx, item)
+	if err != nil {
+		return err
+	}
+	uc.repo.LogEvent(entity.NewProjectEvent(entity.Update, *item))
+	return nil
 }
 
 func (uc *usecase) DeleteProject(ctx context.Context, id int) error {
@@ -60,5 +70,10 @@ func (uc *usecase) DeleteProject(ctx context.Context, id int) error {
 	if err != nil {
 		return err
 	}
-	return uc.repo.DeleteProject(ctx, id)
+	err = uc.repo.DeleteProject(ctx, id)
+	if err != nil {
+		return err
+	}
+	uc.repo.LogEvent(entity.NewProjectEvent(entity.Update, entity.Project{Id: id}))
+	return nil
 }
