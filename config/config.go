@@ -10,12 +10,20 @@ import (
 const cfgPath = "./config"
 
 type Config struct {
-	AppConfig AppConfig      `mapstructure:"app"`
-	APIServer APIServer      `mapstructure:"api_server"`
-	Postgres  PostgresConfig `mapstructure:"postgres"`
-	Redis     Redis          `mapstructure:"redis"`
-	Logger    Logger         `mapstructure:"logger"`
-	Nats      Nats           `mapstructure:"nats"`
+	AppConfig  AppConfig      `mapstructure:"app"`
+	APIServer  APIServer      `mapstructure:"api_server"`
+	Postgres   PostgresConfig `mapstructure:"postgres"`
+	Redis      Redis          `mapstructure:"redis"`
+	Logger     Logger         `mapstructure:"logger"`
+	Nats       Nats           `mapstructure:"nats"`
+	Clickhouse Clickhouse     `mapstructure:"clickhouse"`
+}
+
+type Clickhouse struct {
+	Address  string `mapstructure:"address"`
+	Database string `mapstructure:"database"`
+	Username string `mapstructure:"username"`
+	Password string `mapstructure:"password"`
 }
 
 type Nats struct {
