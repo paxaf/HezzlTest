@@ -29,10 +29,10 @@ func (r *PgPool) GetProjects(ctx context.Context) ([]entity.Project, error) {
 		err = rows.Scan(
 			&val.Id,
 			&val.Name,
-			&val.Created_at,
+			&val.CreatedAt,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("error scan into projevts struct")
+			return nil, fmt.Errorf("error scan into projects struct")
 		}
 		res = append(res, val)
 	}
@@ -44,7 +44,7 @@ func (r *PgPool) GetProject(ctx context.Context, id int) (*entity.Project, error
 	err := r.db.QueryRow(ctx, queryGetProject, id).Scan(
 		&val.Id,
 		&val.Name,
-		&val.Created_at,
+		&val.CreatedAt,
 	)
 
 	if err != nil {

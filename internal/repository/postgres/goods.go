@@ -58,7 +58,7 @@ func (r *PgPool) GetItemsByProject(ctx context.Context, projectId int) ([]entity
 			&item.Description,
 			&item.Priority,
 			&item.Removed,
-			&item.Created_at,
+			&item.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed parse into sturct: %w", err)
@@ -78,7 +78,7 @@ func (r *PgPool) GetItem(ctx context.Context, goodsId int) (*entity.Goods, error
 		&item.Description,
 		&item.Priority,
 		&item.Removed,
-		&item.Created_at,
+		&item.CreatedAt,
 	)
 	if err != nil {
 		return nil, entity.ErrNotFound
@@ -102,7 +102,7 @@ func (r *PgPool) GetItemsByName(ctx context.Context, name string) ([]entity.Good
 			&item.Description,
 			&item.Priority,
 			&item.Removed,
-			&item.Created_at,
+			&item.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed parse into sturct: %w", err)
@@ -128,7 +128,7 @@ func (r *PgPool) GetAllItems(ctx context.Context) ([]entity.Goods, error) {
 			&item.Description,
 			&item.Priority,
 			&item.Removed,
-			&item.Created_at,
+			&item.CreatedAt,
 		)
 		if err != nil {
 			return nil, fmt.Errorf("failed parse into sturct: %w", err)
