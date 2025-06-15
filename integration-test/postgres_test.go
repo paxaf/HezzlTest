@@ -18,25 +18,25 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-type IntegrationSuite struct {
+type PostgresSuite struct {
 	suite.Suite
 	pgContainer testcontainers.Container
 	PgPool      *pgxpool.Pool
 	repo        *postgres.PgPool
 }
 
-func TestIntegration(t *testing.T) {
+func TestPostgres(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration tests")
 	}
-	suite.Run(t, new(IntegrationSuite))
+	suite.Run(t, new(PostgresSuite))
 }
 
-func (s *IntegrationSuite) SetupSuite() {
+func (s *PostgresSuite) SetupSuite() {
 	ctx := context.Background()
 
 	req := testcontainers.ContainerRequest{
-		Image:        "postgres:15",
+		Image:        "redis:7-alpine",
 		ExposedPorts: []string{"5432/tcp"},
 		Env: map[string]string{
 			"POSTGRES_USER":     "testuser",
@@ -70,11 +70,11 @@ func (s *IntegrationSuite) SetupSuite() {
 	s.repo = postgres.New(pool)
 }
 
-func (s *IntegrationSuite) TearDownTest() {
+func (s *PostgresSuite) TearDownTest() {
 	_, _ = s.PgPool.Exec(context.Background(), "TRUNCATE TABLE GOODS RESTART IDENTITY")
 }
 
-func (s *IntegrationSuite) TearDownSuite() {
+func (s *PostgresSuite) TearDownSuite() {
 	if s.pgContainer != nil {
 		_ = s.pgContainer.Terminate(context.Background())
 	}
@@ -95,7 +95,7 @@ func applyGooseMigrations(connStr string, migrationsDir string) error {
 	return nil
 }
 
-func (s *IntegrationSuite) TestWriteGoods() {
+func (s *PostgresSuite) TestWriteGoods() {
 	ctx := context.Background()
 	item := &entity.Goods{
 		ProjectId: 1,
@@ -135,7 +135,7 @@ func (s *IntegrationSuite) TestWriteGoods() {
 	require.Error(s.T(), err)
 }
 
-func (s *IntegrationSuite) TestReadGoods() {
+func (s *PostgresSuite) TestReadGoods() {
 	ctx := context.Background()
 	goods := []*entity.Goods{
 		{

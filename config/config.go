@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/spf13/viper"
 )
@@ -13,6 +14,7 @@ type Config struct {
 	AppConfig AppConfig      `mapstructure:"app"`
 	APIServer APIServer      `mapstructure:"api_server"`
 	Postgres  PostgresConfig `mapstructure:"postgres"`
+	Redis     Redis          `mapstructure:"redis"`
 }
 
 type AppConfig struct {
@@ -33,6 +35,13 @@ type PostgresConfig struct {
 	Port     int    `mapstructure:"port"`
 	Host     string `mapstructure:"host"`
 	DBname   string `mapstructure:"dbname"`
+}
+
+type Redis struct {
+	Addr     string
+	Password string
+	DB       int
+	TTL      time.Duration
 }
 
 func LoadConfig() (*Config, error) {
