@@ -22,3 +22,6 @@ redis:
   addres: "redis:6379"
   password: ""
   db: 1
+
+nats:
+  url: "nats://nats:4222"

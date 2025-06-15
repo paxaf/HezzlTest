@@ -109,6 +109,7 @@ func (s *PostgresSuite) TestWriteGoods() {
 	assert.Equal(s.T(), getItem.Name, item.Name)
 	assert.Equal(s.T(), getItem.Priority, 1)
 	updItem := &entity.Goods{
+		Id:          1,
 		ProjectId:   1,
 		Name:        "Updated name",
 		Description: "New description",

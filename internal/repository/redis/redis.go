@@ -63,6 +63,36 @@ func (rc *RedisClient) RedisGetItems(key string) ([]entity.Goods, error) {
 	return goods, nil
 }
 
+func (rc *RedisClient) RedisGetProject(key string) (*entity.Project, error) {
+	data, err := rc.client.Get(key).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed redis get item: %w", err)
+	}
+	var goods entity.Project
+	if err = json.Unmarshal([]byte(data), &goods); err != nil {
+		return nil, fmt.Errorf("redis unmarshal error: %w", err)
+	}
+	return &goods, nil
+}
+
+func (rc *RedisClient) RedisGetProjects(key string) ([]entity.Project, error) {
+	data, err := rc.client.Get(key).Result()
+	if err != nil {
+		if err == redis.Nil {
+			return nil, err
+		}
+		return nil, fmt.Errorf("failed redis get item: %w", err)
+	}
+	var goods []entity.Project
+	if err = json.Unmarshal([]byte(data), &goods); err != nil {
+		return nil, fmt.Errorf("redis unmarshal error: %w", err)
+	}
+	return goods, nil
+}
+
 func (rc *RedisClient) CleanCache() error {
 	return rc.client.FlushAll().Err()
 }

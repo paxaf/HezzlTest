@@ -15,6 +15,11 @@ type Config struct {
 	Postgres  PostgresConfig `mapstructure:"postgres"`
 	Redis     Redis          `mapstructure:"redis"`
 	Logger    Logger         `mapstructure:"logger"`
+	Nats      Nats           `mapstructure:"nats"`
+}
+
+type Nats struct {
+	Url string `mapstructure:"url"`
 }
 
 type AppConfig struct {

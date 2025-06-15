@@ -12,8 +12,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/nats-io/nats.go"
 	"github.com/paxaf/HezzlTest/config"
 	"github.com/paxaf/HezzlTest/internal/controller"
+	natsClient "github.com/paxaf/HezzlTest/internal/infrastructure/nats"
 	"github.com/paxaf/HezzlTest/internal/logger"
 	"github.com/paxaf/HezzlTest/internal/repository"
 	"github.com/paxaf/HezzlTest/internal/repository/postgres"
@@ -27,6 +29,7 @@ type App struct {
 	closer    *closer
 	router    *gin.Engine
 	logger    *logger.Logger
+	nats      *nats.Conn
 }
 
 func New(cfg *config.Config) (*App, error) {
@@ -48,6 +51,11 @@ func New(cfg *config.Config) (*App, error) {
 	})
 	redisClient := redisClient.New(rclient)
 	repo := repository.New(redisClient, pgpool)
+	ns, err := natsClient.New(app.config.Nats)
+	if err != nil {
+		logger.Fatal("failed create conn to nats", err)
+	}
+	app.nats = ns
 	service := usecase.New(repo)
 	handler := controller.New(service)
 
@@ -58,6 +66,11 @@ func New(cfg *config.Config) (*App, error) {
 	app.router.PATCH("/goods", handler.UpdateItem)
 	app.router.POST("/goods", handler.CreateItem)
 	app.router.DELETE("/goods/:id", handler.DeleteItem)
+	app.router.GET("/projects", handler.GetProjects)
+	app.router.GET("/projects/:id", handler.GetProject)
+	app.router.POST("/projects", handler.CreateProject)
+	app.router.PATCH("/projects/:id", handler.UpdateProject)
+	app.router.DELETE("/projects/:id", handler.DeleteProject)
 
 	host := app.config.APIServer.Host
 	port := app.config.APIServer.Port
