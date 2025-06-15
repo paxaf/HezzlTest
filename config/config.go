@@ -3,7 +3,6 @@ package config
 import (
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/spf13/viper"
 )
@@ -39,10 +38,9 @@ type PostgresConfig struct {
 }
 
 type Redis struct {
-	Addr     string
-	Password string
-	DB       int
-	TTL      time.Duration
+	Addr     string `mapstructure:"addres"`
+	Password string `mapstructure:"password"`
+	DB       int    `mapstructure:"db"`
 }
 
 type Logger struct {

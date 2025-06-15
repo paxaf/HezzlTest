@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/paxaf/HezzlTest/config"
 	"github.com/paxaf/HezzlTest/internal/app"
 	"github.com/paxaf/HezzlTest/internal/logger"
@@ -11,7 +13,7 @@ func main() {
 	if err != nil {
 		logger.Fatal(err, "Failed to load config")
 	}
-
+	fmt.Println(cfg)
 	app, err := app.New(cfg)
 	if err != nil {
 		logger.Fatal(err, "Error creating app")

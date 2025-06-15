@@ -87,7 +87,7 @@ func (h *handler) GetItemsByProject(c *gin.Context) {
 
 func (h *handler) CreateItem(c *gin.Context) {
 	ctx := c.Request.Context()
-	var input *entity.Goods
+	var input entity.Goods
 	projectIdStr := c.Request.FormValue("project_id")
 	input.Name = c.Request.FormValue("name")
 	input.Description = c.Request.FormValue("description")
@@ -97,7 +97,7 @@ func (h *handler) CreateItem(c *gin.Context) {
 		return
 	}
 	input.ProjectId = projectId
-	err = h.service.CreateItem(ctx, input)
+	err = h.service.CreateItem(ctx, &input)
 	if err != nil {
 		// log
 		c.JSON(http.StatusInternalServerError, errorResponse{Error: "Internal error"})
@@ -108,7 +108,7 @@ func (h *handler) CreateItem(c *gin.Context) {
 
 func (h *handler) UpdateItem(c *gin.Context) {
 	ctx := c.Request.Context()
-	var input *entity.Goods
+	var input entity.Goods
 	input.Name = c.Request.FormValue("name")
 	input.Description = c.Request.FormValue("description")
 	priorityStr := c.Request.FormValue("priority")
@@ -125,9 +125,9 @@ func (h *handler) UpdateItem(c *gin.Context) {
 	}
 	input.Priority = priority
 	input.Removed = removed
-	err = h.service.UpdateItem(ctx, input)
+	err = h.service.UpdateItem(ctx, &input)
 	if err != nil {
-		if errors.As(err, entity.ErrNotFound) {
+		if errors.Is(err, entity.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errorResponse{Error: "Not found"})
 			return
 		}
@@ -148,7 +148,7 @@ func (h *handler) DeleteItem(c *gin.Context) {
 	}
 	err = h.service.DeleteItem(ctx, id)
 	if err != nil {
-		if errors.As(err, entity.ErrNotFound) {
+		if errors.Is(err, entity.ErrNotFound) {
 			c.JSON(http.StatusNotFound, errorResponse{Error: "Not found"})
 			return
 		}
