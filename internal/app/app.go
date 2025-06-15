@@ -12,7 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"github.com/nats-io/nats.go"
 	"github.com/paxaf/HezzlTest/config"
 	"github.com/paxaf/HezzlTest/internal/controller"
 	natsClient "github.com/paxaf/HezzlTest/internal/infrastructure/nats"
@@ -29,7 +28,7 @@ type App struct {
 	closer    *closer
 	router    *gin.Engine
 	logger    *logger.Logger
-	nats      *nats.Conn
+	nats      *natsClient.NatsClient
 }
 
 func New(cfg *config.Config) (*App, error) {
