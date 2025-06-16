@@ -1,6 +1,6 @@
 # HezzlTest - Контроль товаров в рекламных кампаниях.
 
-[![Go Version](https://img.shields.io/badge/go-1.23%2B-blue.svg)](https://golang.org/)
+[![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://go.dev/doc/)
 [![Postgres](https://img.shields.io/badge/Postgres-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/docs/)
 [![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/docs)
 [![Gin](https://img.shields.io/badge/Gin-Golang-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://gin-gonic.com/docs/)
