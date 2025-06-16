@@ -53,11 +53,18 @@ func NewClickHouseWorker(nc *nats.Conn, conn driver.Conn, subject string) (*Clic
 }
 
 func (w *ClickHouseWorker) Start() {
+	defer func() {
+		if r := recover(); r != nil {
+			logger.Error("panic in worker")
+			go w.Start()
+		}
+	}()
+
 	sub, err := w.js.Subscribe(w.subject, func(msg *nats.Msg) {
 		event, err := w.unmarshalEvent(msg.Data)
 		if err != nil {
 			logger.Error("failed to unmarshal event", err)
-			msg.Nak() // Negative acknowledgment
+			msg.Nak()
 			return
 		}
 
@@ -167,7 +174,7 @@ func (w *ClickHouseWorker) insertBatch(items []EventWithAck) (successful, failed
 	batch, err := w.conn.PrepareBatch(context.Background(), "INSERT INTO logs.events")
 	if err != nil {
 		logger.Error("failed to prepare batch", err)
-		return nil, items // Все элементы не обработаны
+		return nil, items
 	}
 
 	for _, item := range items {
@@ -182,12 +189,12 @@ func (w *ClickHouseWorker) insertBatch(items []EventWithAck) (successful, failed
 	}
 
 	if len(successful) == 0 {
-		return nil, items // Нечего вставлять
+		return nil, items
 	}
 
 	if err := batch.Send(); err != nil {
 		logger.Error("failed to send batch", err)
-		return nil, items // Весь батч не обработан
+		return nil, items
 	}
 
 	log.Printf("Inserted %d events", len(successful))
@@ -205,9 +212,9 @@ func (w *ClickHouseWorker) appendEventToBatch(batch driver.Batch, event *entity.
 			event.EntityID,
 			event.ProjectID,
 			payload.Name,
-			nil,   // NULL for description
-			0,     // Default priority
-			false, // Default removed
+			nil,
+			0,
+			false,
 			payload.CreatedAt,
 		)
 	case "good":
