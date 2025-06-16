@@ -55,7 +55,7 @@
 ## Установка и запуск
 ```bash
 # Клонировать репозиторий
-git clone https://github.com/paxaf/hezzlTest.git
+git clone https://github.com/paxaf/HezzlTest.git
 cd hezzlTest
 
 # Запустить все сервисы
