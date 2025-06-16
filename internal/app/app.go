@@ -108,7 +108,7 @@ func (app *App) Run() error {
 			app.logger.Fatal(err, "failed to start the server: %v")
 		}
 	}()
-	go app.work.Start(ctx)
+	go app.work.Start()
 
 	<-ctx.Done()
 	app.logger.Info("Received shutdown signal")
