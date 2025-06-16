@@ -60,7 +60,7 @@ func NewProjectEvent(action EventAction, project Project) Event {
 
 type GoodEventPayload struct {
 	Name        string    `json:"name"`
-	Description string    `json:"description,omitempty"`
+	Description *string   `json:"description,omitempty"`
 	Priority    int       `json:"priority"`
 	Removed     bool      `json:"removed"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -69,7 +69,7 @@ type GoodEventPayload struct {
 func (g Goods) ToPayload() interface{} {
 	return GoodEventPayload{
 		Name:        g.Name,
-		Description: g.Description,
+		Description: &g.Description,
 		Priority:    g.Priority,
 		Removed:     g.Removed,
 		CreatedAt:   g.CreatedAt,

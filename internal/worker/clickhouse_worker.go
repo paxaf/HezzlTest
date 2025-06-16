@@ -3,6 +3,8 @@ package worker
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"log"
 	"sync"
 	"time"
 
@@ -109,64 +111,53 @@ func (w *ClickHouseWorker) flushBatch(ctx context.Context) {
 }
 
 func (w *ClickHouseWorker) insertBatch(ctx context.Context, events []entity.Event) error {
-	query := `
-	INSERT INTO events (
-		timestamp,
-		action,
-		entity,
-		entity_id,
-		project_id,
-		name,
-		description,
-		priority,
-		removed,
-		created_at
-	) VALUES`
+	batch, err := w.conn.PrepareBatch(ctx, "INSERT INTO logs.events")
+	if err != nil {
+		return fmt.Errorf("failed to prepare batch: %w", err)
+	}
 
-	args := make([]interface{}, 0, len(events)*10)
-	valuePlaceholders := ""
-
-	for i, event := range events {
-		if i > 0 {
-			valuePlaceholders += ", "
+	for _, event := range events {
+		if event.Entity == "project" {
+			payload := event.Payload.(entity.ProjectEventPayload)
+			err = batch.Append(
+				event.Timestamp,
+				string(event.Action),
+				event.Entity,
+				event.EntityID,
+				event.ProjectID,
+				payload.Name,
+				"",
+				0,
+				false,
+				payload.CreatedAt,
+			)
+		} else if event.Entity == "good" {
+			payload := event.Payload.(entity.GoodEventPayload)
+			err = batch.Append(
+				event.Timestamp,
+				string(event.Action),
+				event.Entity,
+				event.EntityID,
+				event.ProjectID,
+				payload.Name,
+				payload.Description,
+				payload.Priority,
+				payload.Removed,
+				payload.CreatedAt,
+			)
 		}
-		valuePlaceholders += "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
-		args = append(args,
-			event.Timestamp,
-			string(event.Action),
-			event.Entity,
-			event.EntityID,
-			event.ProjectID,
-		)
-
-		switch event.Entity {
-		case "project":
-			if payload, ok := event.Payload.(entity.ProjectEventPayload); ok {
-				args = append(args,
-					payload.Name,
-					"",
-					0,
-					false,
-					payload.CreatedAt,
-				)
-			}
-		case "good":
-			if payload, ok := event.Payload.(entity.GoodEventPayload); ok {
-				args = append(args,
-					payload.Name,
-					payload.Description,
-					payload.Priority,
-					payload.Removed,
-					payload.CreatedAt,
-				)
-			}
-		default:
-			args = append(args, "", "", 0, false, time.Time{})
+		if err != nil {
+			return fmt.Errorf("failed to append event: %w", err)
 		}
 	}
 
-	return w.conn.Exec(ctx, query+valuePlaceholders, args...)
+	if err := batch.Send(); err != nil {
+		return fmt.Errorf("failed to send batch: %w", err)
+	}
+
+	log.Printf("Successfully inserted %d events", len(events))
+	return nil
 }
 
 func (ch *ClickHouseWorker) Close() {
