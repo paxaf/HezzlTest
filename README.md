@@ -1,12 +1,12 @@
 # HezzlTest - Контроль товаров в рекламных кампаниях.
 
 [![Go Version](https://img.shields.io/badge/go-1.23%2B-blue.svg)](https://golang.org/)
-![Postgres](https://img.shields.io/badge/Postgres-316192?style=for-the-badge&logo=postgresql&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
-![Gin](https://img.shields.io/badge/Gin-Golang-00ADD8?style=for-the-badge&logo=go&logoColor=white)
-![ClickHouse](https://img.shields.io/badge/ClickHouse-FFCC01?style=for-the-badge&logo=clickhouse&logoColor=black)
-![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
-![NATS](https://img.shields.io/badge/NATS-199bfc?style=for-the-badge&logo=nats&logoColor=white)
+[![Postgres](https://img.shields.io/badge/Postgres-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/docs/)
+[![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)](https://redis.io/docs)
+[![Gin](https://img.shields.io/badge/Gin-Golang-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://gin-gonic.com/docs/)
+[![ClickHouse](https://img.shields.io/badge/ClickHouse-FFCC01?style=for-the-badge&logo=clickhouse&logoColor=black)](https://clickhouse.com/docs/en/)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)](https://docs.docker.com/)
+[![NATS](https://img.shields.io/badge/NATS-199bfc?style=for-the-badge&logo=nats&logoColor=white)](https://docs.nats.io/)
 
 Сервис для управления торговыми рекламными кампаниями.
 
@@ -77,6 +77,41 @@ docker compose up -d --build #new
 | GET  | `/goods/:id`  | Получить товар по id           |
 | PATCH  | `/goods`  | Обновить информацию о товаре           |
 | DELETE  | `/goods/:id`  | Удалить товар           |
+
+## Тело запросов
+
+1. `POST /goods` - Создать товар
+```JSON
+{
+  "name": "Товар 1", // обязательное поле
+  "description": "Описание товара",
+  "project_id": 123 // обязательное и должно ссылаться на существующий projects(id)
+}
+```
+
+2. `PATCH /goods` - Обновить товар
+```JSON
+{
+	// все поля обязательные
+  "id": 42, 
+  "name": "Обновленный товар", // не пустое
+  "description": "Новое описание товара", // можно пустым
+  "priority": 10 // gt=0
+}
+```
+3. `POST /projects` - Создать проект
+```JSON
+{
+  "name": "Новая кампания", // не пустое
+}
+```
+4. `PATCH /projects` - Создать проект
+```JSON
+{
+	"id"
+  "name": "Новая кампания", // не пустое
+}
+```
 ## Запуск тестов
 Перед запуском интеграционных тестов убедитесь что у вас запущен Docker на машине.
 ```bash
