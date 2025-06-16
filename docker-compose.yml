@@ -50,12 +50,10 @@ services:
   nats:
     image: nats:latest
     container_name: nats
-    command: ["-js", "--store_dir=/data/jetstream"]
+    command: ["-js"]
     ports:
       - "4222:4222"
       - "8222:8222"
-    volumes:
-      - "./nats_data:/data/jetstream"
   clickhouse:
     image: clickhouse/clickhouse-server:23.10
     container_name: clickhouse

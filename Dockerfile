@@ -10,6 +10,7 @@ ENV CGO_ENABLED=0 \
     GOOS=linux \
     GOARCH=amd64
 
+# RUN go test ./... -race -cover -v -short
 RUN go build -o service ./cmd
 
 FROM alpine:3.21
