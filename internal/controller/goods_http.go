@@ -74,6 +74,7 @@ func (h *handler) GetItemsByName(c *gin.Context) {
 	}
 	if output == nil {
 		c.JSON(http.StatusOK, map[string]interface{}{})
+		return
 	}
 	c.JSON(http.StatusOK, output)
 }
@@ -95,6 +96,7 @@ func (h *handler) GetItemsByProject(c *gin.Context) {
 	}
 	if output == nil {
 		c.JSON(http.StatusOK, map[string]interface{}{})
+		return
 	}
 	c.JSON(http.StatusOK, output)
 }
